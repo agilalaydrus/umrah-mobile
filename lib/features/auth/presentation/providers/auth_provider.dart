@@ -2,9 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-// [FIX] Absolute Imports: No more "../../" guessing games
+// [FIX] Absolute Imports
 import 'package:umrah_app/core/network/api_client.dart';
-import 'package:umrah_app/features/home/data/auth_repository.dart';
+// Note: Ensure this path matches where your AuthRepository actually is. 
+// Usually it is features/auth/data/auth_repository.dart
+import 'package:umrah_app/features/home/data/auth_repository.dart'; 
 
 // 1. Core Providers
 final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
@@ -27,14 +29,16 @@ class AuthState {
   final bool isLoading;
   final bool isAuthenticated;
   final String? role;
-  final String? userId; // <--- NEW FIELD
+  final String? userId; 
+  final String? groupId; // <--- [NEW] Field for Group ID
   final String? error;
 
   AuthState({
     this.isLoading = false,
     this.isAuthenticated = false,
     this.role,
-    this.userId, // <--- NEW
+    this.userId,
+    this.groupId, // <--- [NEW]
     this.error,
   });
 
@@ -42,14 +46,16 @@ class AuthState {
     bool? isLoading, 
     bool? isAuthenticated, 
     String? role, 
-    String? userId, // <--- NEW
+    String? userId, 
+    String? groupId, // <--- [NEW]
     String? error
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       role: role ?? this.role,
-      userId: userId ?? this.userId, // <--- NEW
+      userId: userId ?? this.userId,
+      groupId: groupId ?? this.groupId, // <--- [NEW]
       error: error ?? this.error,
     );
   }
@@ -59,8 +65,8 @@ class AuthState {
 class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
-    checkSession(); // Fire and forget check on startup
-    return AuthState(); // Initial state
+    checkSession(); 
+    return AuthState(); 
   }
 
   Future<void> checkSession() async {
@@ -69,12 +75,15 @@ class AuthNotifier extends Notifier<AuthState> {
     
     if (token != null && !JwtDecoder.isExpired(token)) {
       final decoded = JwtDecoder.decode(token);
+      
       final id = decoded['user_id'] ?? decoded['sub'] ?? decoded['id']; 
+      final gId = decoded['group_id']; // <--- [NEW] Extract group_id from token
 
       state = AuthState(
         isAuthenticated: true, 
         role: decoded['role'],
-        userId: id.toString(), // <--- STORE IT
+        userId: id.toString(),
+        groupId: gId?.toString(), // <--- [NEW] Store it
       );
     } else {
       state = AuthState(isAuthenticated: false);

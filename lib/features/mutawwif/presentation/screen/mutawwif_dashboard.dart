@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// 1. Auth & Login Imports
+// 1. Auth Imports
 import 'package:umrah_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:umrah_app/features/auth/presentation/screen/login_screen.dart'; 
 // 2. Mutawwif Feature Imports
 import 'package:umrah_app/features/mutawwif/presentation/screen/scan_qr_screen.dart';
 import 'package:umrah_app/features/mutawwif/presentation/screen/tracking_screen.dart';
+import 'package:umrah_app/features/mutawwif/presentation/screen/my_group_screen.dart';
+import 'package:umrah_app/features/mutawwif/presentation/screen/broadcast_screen.dart';
+import 'package:umrah_app/features/mutawwif/presentation/screen/attendance_screen.dart';
 
 class MutawwifDashboard extends ConsumerWidget {
   const MutawwifDashboard({super.key});
@@ -20,9 +23,7 @@ class MutawwifDashboard extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
-              // Trigger Logout
               await ref.read(authControllerProvider.notifier).logout();
-              
               if (context.mounted) {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -71,11 +72,41 @@ class MutawwifDashboard extends ConsumerWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  _menuCard(Icons.group, "My Group", Colors.orange),
-                  _menuCard(Icons.list_alt, "Attendance", Colors.blue),
-                  _menuCard(Icons.notifications, "Broadcast", Colors.red),
-                  
-                  // [UPDATED] Track Group Button -> Opens Map
+                  // [FIX] Wired up My Group Screen
+                  _menuCard(
+                    Icons.group, 
+                    "My Group", 
+                    Colors.orange,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MyGroupScreen()),
+                      );
+                    }
+                  ),  
+                  _menuCard(
+                    Icons.list_alt, 
+                    "Attendance", 
+                    Colors.blue,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const AttendanceScreen()),
+                      );
+                    }
+                  ),
+                  _menuCard(
+                    Icons.notifications, 
+                    "Broadcast", 
+                    Colors.red,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const BroadcastScreen()),
+                      );
+                    },
+                  ),      
+                  // Track Group Button
                   _menuCard(
                     Icons.map, 
                     "Track Group", 
@@ -124,13 +155,12 @@ class MutawwifDashboard extends ConsumerWidget {
     );
   }
 
-  // [UPDATED] Added 'onTap' parameter to handle clicks
   Widget _menuCard(IconData icon, String label, Color color, {VoidCallback? onTap}) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: InkWell(
-        onTap: onTap, // Hook up the tap event
+        onTap: onTap,
         borderRadius: BorderRadius.circular(15),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
