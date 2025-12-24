@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 
 // [FIX] Absolute Imports to find the files we just created
-import 'package:umrah_app/features/mutawwif/providers/tracking_providers.dart';
+import 'package:umrah_app/features/mutawwif/presentation/providers/tracking_providers.dart';
 import 'package:umrah_app/features/mutawwif/data/location_repository.dart';
 
 class TrackingScreen extends ConsumerStatefulWidget {

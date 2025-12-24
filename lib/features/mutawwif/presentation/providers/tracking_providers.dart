@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../features/auth/presentation/providers/auth_provider.dart';
-import '../../mutawwif/data/location_repository.dart';
+import '../../../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../data/location_repository.dart';
 
 // 1. Repository Provider
 final locationRepositoryProvider = Provider<LocationRepository>((ref) {
