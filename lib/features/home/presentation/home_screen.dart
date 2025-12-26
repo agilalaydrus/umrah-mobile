@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-// Import the domain model
 import '../domain/home_dashboard_data.dart';
-// Import the Home Provider
 import 'home_provider.dart';
-// Import the Auth Provider (to get User ID)
 import '../../auth/presentation/providers/auth_provider.dart';
-// Import the QR Widget
 import 'widgets/qr_id_modal.dart';
+// Feature Imports
+import 'package:umrah_app/features/chat/presentation/screen/chat_screen.dart';
+import 'package:umrah_app/features/guide/presentation/screens/guide_list_screen.dart';
+import 'package:umrah_app/features/itinerary/presentation/screens/rundown_screen.dart';
+import 'package:umrah_app/features/commerce/presentation/screens/catalog_screen.dart';
+import 'package:umrah_app/features/travel/presentation/screens/package_list_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Watch the Home Data (Departure time, flight, etc.)
     final dashboardState = ref.watch(homeDataProvider);
 
     return Scaffold(
@@ -37,26 +38,22 @@ class HomeScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // 1. Status Card
               _buildStatusCard(data),
-
               const SizedBox(height: 20),
               
-              // 2. Quick Actions (Now functional!)
+              // 2. Quick Actions
               _buildQuickActions(context, ref),
               
               const SizedBox(height: 20),
               
               // 3. Current Step
-              _buildCurrentStep(data.currentStep),
+              _buildCurrentStep(context, data.currentStep),
             ],
           ),
         ),
       ),
     );
   }
-
-  // --- WIDGET BUILDERS ---
 
   Widget _buildStatusCard(HomeDashboardData data) { 
     return Container(
@@ -94,41 +91,84 @@ class HomeScreen extends ConsumerWidget {
   }
   
   Widget _buildQuickActions(BuildContext context, WidgetRef ref) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+    // We use a Wrap instead of Row to allow multiple lines of buttons
+    return Wrap(
+      spacing: 20,
+      runSpacing: 20,
+      alignment: WrapAlignment.center,
       children: [
-        // 1. My ID (Opens QR Modal)
+        // 1. My ID
         _actionButton(
           icon: Icons.qr_code, 
           label: "My ID", 
           onTap: () {
-            // Read User ID from Auth State
             final userId = ref.read(authControllerProvider).userId;
-            
             if (userId != null) {
               showModalBottomSheet(
                 context: context,
-                isScrollControlled: true, // Allows modal to be taller if needed
+                isScrollControlled: true,
                 backgroundColor: Colors.transparent,
                 builder: (context) => QrIdModal(userId: userId),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Error: User ID missing. Please login again.")),
+                const SnackBar(content: Text("Error: User ID missing.")),
               );
             }
           }
         ),
 
-        // 2. Placeholders for other features
-        _actionButton(icon: Icons.menu_book, label: "Doa", onTap: () {}),
-        _actionButton(icon: Icons.map, label: "Map", onTap: () {}),
-        _actionButton(icon: Icons.support_agent, label: "Help", onTap: () {}),
+        // 2. Chat
+        _actionButton(
+          icon: Icons.chat, 
+          label: "Chat", 
+          onTap: () {
+             Navigator.push(
+               context,
+               MaterialPageRoute(builder: (context) => const ChatScreen()),
+             );
+          }
+        ),
+
+        // 3. Manasik
+        _actionButton(
+          icon: Icons.menu_book, 
+          label: "Manasik", 
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const GuideListScreen()),
+            );
+          }
+        ),
+
+        // 4. Store (Roaming)
+        _actionButton(
+          icon: Icons.store, 
+          label: "Store", 
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CatalogScreen()),
+            );
+          }
+        ),
+
+        // 5. Packages (New)
+        _actionButton(
+          icon: Icons.flight_takeoff, 
+          label: "Packages", 
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PackageListScreen()),
+            );
+          }
+        ),
       ],
     );
   }
 
-  // Helper for consistent buttons
   Widget _actionButton({
     required IconData icon, 
     required String label, 
@@ -140,6 +180,7 @@ class HomeScreen extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min, // Keep it compact
           children: [
             CircleAvatar(
               radius: 25,
@@ -154,14 +195,22 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildCurrentStep(String step) {
-    return Card(
-      elevation: 2,
-      child: ListTile(
-        leading: const Icon(Icons.location_on, color: Colors.orange),
-        title: const Text("Next Activity", style: TextStyle(fontSize: 12, color: Colors.grey)),
-        subtitle: Text(step, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        trailing: const Icon(Icons.chevron_right),
+  Widget _buildCurrentStep(BuildContext context, String step) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RundownScreen()),
+        );
+      },
+      child: Card(
+        elevation: 2,
+        child: ListTile(
+          leading: const Icon(Icons.location_on, color: Colors.orange),
+          title: const Text("Next Activity", style: TextStyle(fontSize: 12, color: Colors.grey)),
+          subtitle: Text(step, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          trailing: const Icon(Icons.chevron_right, color: Colors.grey),
+        ),
       ),
     );
   }

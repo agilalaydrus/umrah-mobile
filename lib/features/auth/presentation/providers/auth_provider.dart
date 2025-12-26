@@ -4,8 +4,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 // [FIX] Absolute Imports
 import 'package:umrah_app/core/network/api_client.dart';
-// Note: Ensure this path matches where your AuthRepository actually is. 
-// Usually it is features/auth/data/auth_repository.dart
+// Note: Double check if your repo is in 'home' or 'auth'. Standard is 'auth'.
 import 'package:umrah_app/features/home/data/auth_repository.dart'; 
 
 // 1. Core Providers
@@ -30,16 +29,18 @@ class AuthState {
   final bool isAuthenticated;
   final String? role;
   final String? userId; 
-  final String? groupId; // <--- [NEW] Field for Group ID
+  final String? groupId;
   final String? error;
+  final String? phoneNumber; // Used for Chat "isMe" check
 
   AuthState({
     this.isLoading = false,
     this.isAuthenticated = false,
     this.role,
     this.userId,
-    this.groupId, // <--- [NEW]
+    this.groupId,
     this.error,
+    this.phoneNumber,
   });
 
   AuthState copyWith({
@@ -47,21 +48,23 @@ class AuthState {
     bool? isAuthenticated, 
     String? role, 
     String? userId, 
-    String? groupId, // <--- [NEW]
-    String? error
+    String? groupId, 
+    String? error,
+    String? phoneNumber, // <--- [FIX] Added parameter
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       role: role ?? this.role,
       userId: userId ?? this.userId,
-      groupId: groupId ?? this.groupId, // <--- [NEW]
+      groupId: groupId ?? this.groupId,
       error: error ?? this.error,
+      phoneNumber: phoneNumber ?? this.phoneNumber, // <--- [FIX] Added assignment
     );
   }
 }
 
-// 3. Auth Notifier (Modern Riverpod 2.0)
+// 3. Auth Notifier
 class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
@@ -77,13 +80,15 @@ class AuthNotifier extends Notifier<AuthState> {
       final decoded = JwtDecoder.decode(token);
       
       final id = decoded['user_id'] ?? decoded['sub'] ?? decoded['id']; 
-      final gId = decoded['group_id']; // <--- [NEW] Extract group_id from token
+      final gId = decoded['group_id']; 
+      final phone = decoded['phone_number']; // <--- [FIX] Extract phone
 
       state = AuthState(
         isAuthenticated: true, 
         role: decoded['role'],
         userId: id.toString(),
-        groupId: gId?.toString(), // <--- [NEW] Store it
+        groupId: gId?.toString(),
+        phoneNumber: phone?.toString(), // <--- [FIX] Store phone
       );
     } else {
       state = AuthState(isAuthenticated: false);

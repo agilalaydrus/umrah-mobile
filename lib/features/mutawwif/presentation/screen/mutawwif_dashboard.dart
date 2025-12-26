@@ -9,6 +9,8 @@ import 'package:umrah_app/features/mutawwif/presentation/screen/tracking_screen.
 import 'package:umrah_app/features/mutawwif/presentation/screen/my_group_screen.dart';
 import 'package:umrah_app/features/mutawwif/presentation/screen/broadcast_screen.dart';
 import 'package:umrah_app/features/mutawwif/presentation/screen/attendance_screen.dart';
+// [NEW] Chat Import
+import 'package:umrah_app/features/chat/presentation/screen/chat_screen.dart';
 
 class MutawwifDashboard extends ConsumerWidget {
   const MutawwifDashboard({super.key});
@@ -72,7 +74,6 @@ class MutawwifDashboard extends ConsumerWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  // [FIX] Wired up My Group Screen
                   _menuCard(
                     Icons.group, 
                     "My Group", 
@@ -84,6 +85,20 @@ class MutawwifDashboard extends ConsumerWidget {
                       );
                     }
                   ),  
+                  
+                  // [NEW] Group Chat Button
+                  _menuCard(
+                    Icons.chat, 
+                    "Group Chat", 
+                    Colors.green,
+                    onTap: () {
+                       Navigator.push(
+                         context,
+                         MaterialPageRoute(builder: (context) => const ChatScreen()),
+                       );
+                    }
+                  ),
+
                   _menuCard(
                     Icons.list_alt, 
                     "Attendance", 
@@ -95,6 +110,7 @@ class MutawwifDashboard extends ConsumerWidget {
                       );
                     }
                   ),
+                  
                   _menuCard(
                     Icons.notifications, 
                     "Broadcast", 
@@ -106,7 +122,7 @@ class MutawwifDashboard extends ConsumerWidget {
                       );
                     },
                   ),      
-                  // Track Group Button
+                  
                   _menuCard(
                     Icons.map, 
                     "Track Group", 
